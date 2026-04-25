@@ -19,7 +19,8 @@ namespace Synty.AnimationBaseLocomotion.Samples.InputSystem
 
         public float _movementInputDuration;
         public bool _movementInputDetected;
-
+        public bool JumpHeld { get; private set; }
+        public bool JumpJustPressed { get; private set; }
         private Controls _controls;
 
         public Action onAimActivated;
@@ -47,6 +48,11 @@ namespace Synty.AnimationBaseLocomotion.Samples.InputSystem
             }
 
             _controls.Player.Enable();
+        }
+
+        private void LateUpdate()
+        {
+            JumpJustPressed = false;
         }
 
         /// <inheritdoc cref="OnDisable" />
@@ -80,12 +86,16 @@ namespace Synty.AnimationBaseLocomotion.Samples.InputSystem
         /// <param name="context">The context of the callback.</param>
         public void OnJump(InputAction.CallbackContext context)
         {
-            if (!context.performed)
+            if (context.started)
             {
-                return;
+                JumpJustPressed = true;
+                JumpHeld = true;
+                onJumpPerformed?.Invoke();
             }
-
-            onJumpPerformed?.Invoke();
+            else if (context.canceled)
+            {
+                JumpHeld = false;
+            }
         }
 
         /// <summary>
